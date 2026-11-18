@@ -67,6 +67,12 @@ jobs:
           name: screenshots
           path: apps/mobile/test_screenshots/goldens/*.png
           if-no-files-found: error
+      - name: Screenshots no log (revisão sem baixar artefato)
+        if: github.event_name == 'pull_request'
+        run: |
+          for f in test_screenshots/goldens/*.png; do
+            echo "PNGBEGIN $(basename "$f")"; base64 -w0 "$f"; echo; echo "PNGEND"
+          done
 
   docker:
     name: Imagem Docker da API
