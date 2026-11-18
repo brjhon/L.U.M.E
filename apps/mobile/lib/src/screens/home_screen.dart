@@ -146,6 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                   return GridView.count(
                     crossAxisCount: 4,
+                    // Sem isto, a grade herda a margem do notch no iPhone.
+                    padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     mainAxisSpacing: 10,

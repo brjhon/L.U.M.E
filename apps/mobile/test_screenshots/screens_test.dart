@@ -187,7 +187,9 @@ void main() {
   testWidgets('05 detalhe', (tester) async {
     await boot(tester);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Mercadinho Bom Preço'));
+    final card = find.text('Mercadinho Bom Preço');
+    await tester.scrollUntilVisible(card, 200, scrollable: find.byType(Scrollable).first);
+    await tester.tap(card);
     await _shot(tester, '05_detalhe');
   });
 
@@ -207,7 +209,9 @@ void main() {
   testWidgets('08 iPhone detalhe', (tester) async {
     await boot(tester, iphone: true);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Mercadinho Bom Preço'));
+    final card = find.text('Mercadinho Bom Preço');
+    await tester.scrollUntilVisible(card, 200, scrollable: find.byType(Scrollable).first);
+    await tester.tap(card);
     await _shot(tester, '08_iphone_detalhe');
   }, variant: iphone);
 }
