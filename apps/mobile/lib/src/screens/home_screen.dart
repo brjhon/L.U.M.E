@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
-                    childAspectRatio: 0.9,
+                    childAspectRatio: 0.8,
                     children: [
                       for (final c in snap.data!)
                         CategoryTile(slug: c.slug, label: c.name, onTap: () => _openResults(category: c)),

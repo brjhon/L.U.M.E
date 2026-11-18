@@ -68,7 +68,7 @@ class CategoryTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: LumeColors.border),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -82,6 +82,7 @@ class CategoryTile extends StatelessWidget {
               Text(
                 label,
                 maxLines: 1,
+                textScaler: TextScaler.noScaling,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: LumeColors.text),
