@@ -21,11 +21,17 @@ e imagem Docker da API.
 - Fila de moderação no painel admin; perfis começam como PENDING.
 - **Critério:** parceiro cadastra oferta e define onde atende, com moderação.
 
-## Sprint 3: busca e interface
-- `GET /v1/search?lat&lng&q&category&mode&communityId&cursor`.
+## Sprint 3: busca e interface ✅ (adiantado, antes dos Sprints 1 e 2)
+Feito como fatia vertical para demonstrar o produto aos sócios com dados fictícios
+(`pnpm db:seed:demo`). Paginação por `page`/`pageSize`.
+- `GET /v1/search?lat&lng&q&category&mode&communityId&page`.
 - Elegibilidade: CONFIRMED (cobertura verificada contém o ponto), UNCONFIRMED (declarada sem
   verificação), NOT_SERVED. Raio via `ST_DWithin`, polígono via `ST_Covers`.
-- Telas Flutter: início, busca, resultados, detalhe, botões de contato.
+- Telas Flutter: início, endereço (texto/CEP, sem GPS), resultados, detalhe, botões de contato.
+- `GET /v1/geocode` (Google com chave; OpenStreetMap no desenvolvimento; CEP via ViaCEP).
+- Registro de cliques em contato (`contact_events`), adiantado do Sprint 4.
+- Pendente: filtro de comunidade só para membros aprovados (depende do RBAC do Sprint 1);
+  mapa na tela de resultados.
 - **Critério:** buscar por endereço retorna só ofertas elegíveis ou separa claramente as desconhecidas.
 
 ## Sprint 4: participação e piloto
@@ -39,6 +45,19 @@ e imagem Docker da API.
 3. Região e condomínio do piloto.
 4. Orçamento de infraestrutura (VPS vs. nuvem gerenciada) e conta do Google Maps Platform.
 5. Busca de marca "LUME" no INPI (classes 35 e 42) antes de investir na identidade.
+
+## Próximo passo recomendado
+Sprint 2 antes do 1: sem o painel do parceiro, os fornecedores só entram via seed/SQL.
+Com o CRUD de fornecedor/oferta/cobertura e a fila de moderação, a equipe já consegue
+cadastrar o piloto. Login e comunidades (Sprint 1) entram logo em seguida.
+
+## Decisões de arquitetura tomadas no Sprint 3
+- Fornecedor **sem área declarada** aparece como `UNCONFIRMED` só se tiver endereço a até
+  `maxDistanceM` (padrão 15 km); caso contrário, não aparece.
+- Cobertura `COMMUNITY` vale para quem informa o `communityId` ou busca a até 200 m do
+  endereço do condomínio.
+- Ranking: confirmadas → presenciais → não confirmadas → remotas → não atende; depois
+  relevância do texto (`pg_trgm`) e distância.
 
 ## Decisões de arquitetura tomadas no Sprint 0
 - **Painel único** para admin e parceiro (o PDF previa dois): menos código para manter no MVP.
