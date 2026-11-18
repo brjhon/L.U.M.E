@@ -79,13 +79,15 @@ class CategoryTile extends StatelessWidget {
                 child: Icon(categoryIcon(slug), color: LumeColors.orange, size: 24),
               ),
               const SizedBox(height: 8),
-              Text(
-                label,
-                maxLines: 1,
-                textScaler: TextScaler.noScaling,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: LumeColors.text),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  textScaler: TextScaler.noScaling,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: LumeColors.text),
+                ),
               ),
             ],
           ),

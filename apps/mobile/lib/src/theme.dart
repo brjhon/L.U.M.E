@@ -89,8 +89,14 @@ ThemeData buildLumeTheme() {
       backgroundColor: Colors.white,
       selectedColor: LumeColors.orange,
       side: const BorderSide(color: LumeColors.border),
-      labelStyle: const TextStyle(fontWeight: FontWeight.w600, color: LumeColors.text),
-      secondaryLabelStyle: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+      // Branco quando selecionado (fundo laranja), escuro nos demais.
+      labelStyle: text.labelLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: WidgetStateColor.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? Colors.white : LumeColors.text,
+        ),
+      ),
+      secondaryLabelStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600, color: Colors.white),
       checkmarkColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
