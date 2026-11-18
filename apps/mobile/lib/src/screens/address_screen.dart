@@ -73,7 +73,7 @@ class _AddressScreenState extends State<AddressScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       body: ListView(
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 24),
         children: [
           NavyHeader(
             padding: const EdgeInsets.fromLTRB(4, 0, 20, 24),

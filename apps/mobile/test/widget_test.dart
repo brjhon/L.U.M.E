@@ -211,6 +211,11 @@ void main() {
     expect(EligibilityBadge.describe(ServiceMode.inStore, Eligibility.confirmed).$1, 'Ir até o local');
   });
 
+  test('URL padrão da API por plataforma', () {
+    expect(ApiClient.defaultBaseUrl(android: true), 'http://10.0.2.2:3000');
+    expect(ApiClient.defaultBaseUrl(android: false), 'http://localhost:3000');
+  });
+
   test('formata distância', () {
     expect(formatDistance(398), '400 m');
     expect(formatDistance(1677), '1,7 km');

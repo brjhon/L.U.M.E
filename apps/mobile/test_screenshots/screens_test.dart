@@ -33,6 +33,18 @@ Future<void> _loadFonts() async {
   }
   await roboto.load();
 
+  // No iOS o tema usa a fonte do sistema (SF Pro), que não existe no Linux da CI:
+  // a Roboto entra no lugar só para o screenshot. No aparelho, aparece a SF Pro.
+  final robotoFiles =
+      _find(fontsDir, (n) => n.startsWith('Roboto') && n.endsWith('.ttf') && !n.contains('Condensed')).toList();
+  for (final family in ['CupertinoSystemText', 'CupertinoSystemDisplay', '.AppleSystemUIFont', '.SF Pro Text', '.SF Pro Display', '.SF UI Text', '.SF UI Display']) {
+    final loader = FontLoader(family);
+    for (final f in robotoFiles) {
+      loader.addFont(Future.value(ByteData.sublistView(f.readAsBytesSync())));
+    }
+    await loader.load();
+  }
+
   final candidates = [
     ..._find(fontsDir, (n) => n == 'MaterialIcons-Regular.otf'),
     ..._find(Directory('$pubCache/hosted/pub.dev'), (n) => n == 'MaterialIcons-Regular.otf'),
@@ -133,9 +145,15 @@ Future<void> _shot(WidgetTester tester, String name) async {
 void main() {
   setUpAll(_loadFonts);
 
-  Future<void> boot(WidgetTester tester, {bool withAddress = true}) async {
+  Future<void> boot(WidgetTester tester, {bool withAddress = true, bool iphone = false}) async {
     tester.view.physicalSize = const Size(780, 1688); // 390 x 844 pt
     tester.view.devicePixelRatio = 2;
+    if (iphone) {
+      // Notch (47 pt) e indicador de início (34 pt) do iPhone, em pixels físicos.
+      const insets = FakeViewPadding(top: 94, bottom: 68);
+      tester.view.padding = insets;
+      tester.view.viewPadding = insets;
+    }
     addTearDown(tester.view.reset);
     await tester.pumpWidget(LumeApp(
       api: ApiClient(baseUrl: 'http://t', client: _api()),
@@ -172,4 +190,24 @@ void main() {
     await tester.tap(find.text('Mercadinho Bom Preço'));
     await _shot(tester, '05_detalhe');
   });
+
+  final iphone = TargetPlatformVariant.only(TargetPlatform.iOS);
+
+  testWidgets('06 iPhone início', (tester) async {
+    await boot(tester, iphone: true);
+    await _shot(tester, '06_iphone_inicio');
+  }, variant: iphone);
+
+  testWidgets('07 iPhone resultados', (tester) async {
+    await boot(tester, iphone: true);
+    await tester.tap(find.text('Buscar'));
+    await _shot(tester, '07_iphone_resultados');
+  }, variant: iphone);
+
+  testWidgets('08 iPhone detalhe', (tester) async {
+    await boot(tester, iphone: true);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mercadinho Bom Preço'));
+    await _shot(tester, '08_iphone_detalhe');
+  }, variant: iphone);
 }

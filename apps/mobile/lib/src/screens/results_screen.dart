@@ -298,7 +298,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       ));
     }
 
-    return ListView(padding: const EdgeInsets.only(bottom: 24), children: children);
+    return ListView(padding: EdgeInsets.only(bottom: 24 + MediaQuery.paddingOf(context).bottom), children: children);
   }
 
   Widget _modeChip(ServiceMode? mode, String label) => Padding(

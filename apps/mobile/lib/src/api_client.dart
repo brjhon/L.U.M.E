@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:http/http.dart' as http;
 
 import 'models.dart';
@@ -17,9 +18,17 @@ class ApiException implements Exception {
 /// Cliente da API L.U.M.E. Contrato em docs/openapi.json.
 class ApiClient {
   ApiClient({String? baseUrl, http.Client? client})
-      : baseUrl = baseUrl ??
-            const String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:3000'),
+      : baseUrl = baseUrl ?? defaultBaseUrl(),
         _client = client ?? http.Client();
+
+  /// `--dart-define=API_URL=...` tem prioridade. Sem ele, aponta para a API local:
+  /// o emulador Android enxerga o computador em 10.0.2.2; o simulador do iPhone, em localhost.
+  static String defaultBaseUrl({bool? android}) {
+    const fromEnv = String.fromEnvironment('API_URL');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    final isAndroid = android ?? (!kIsWeb && defaultTargetPlatform == TargetPlatform.android);
+    return isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+  }
 
   final String baseUrl;
   final http.Client _client;

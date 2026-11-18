@@ -107,7 +107,7 @@ class _Detail extends StatelessWidget {
     final place = d.locations.isEmpty ? null : d.locations.first;
 
     return ListView(
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
       children: [
         NavyHeader(
           padding: const EdgeInsets.fromLTRB(4, 0, 20, 28),
