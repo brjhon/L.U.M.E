@@ -195,9 +195,9 @@ void main() {
       initialAddress: const SelectedAddress(label: 'Casa', location: GeoPoint(-23.5, -46.6)),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Destaques na sua região'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Entrega de compras'), 200,
-        scrollable: find.byType(Scrollable).first);
+    final homeList = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(find.text('Destaques na sua região'), 200, scrollable: homeList);
+    await tester.scrollUntilVisible(find.text('Entrega de compras'), 200, scrollable: homeList);
     expect(find.text('Entrega de compras'), findsOneWidget);
 
     await tester.tap(find.text('Favoritos'));
