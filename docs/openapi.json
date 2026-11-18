@@ -17,6 +17,301 @@
           "health"
         ]
       }
+    },
+    "/v1/search": {
+      "get": {
+        "description": "Classifica cada oferta pela cobertura declarada. Por padrão omite quem declara não atender o endereço.",
+        "operationId": "SearchController_find_v1",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "description": "Latitude do endereço buscado",
+            "schema": {
+              "example": -23.5869,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "description": "Longitude do endereço buscado",
+            "schema": {
+              "example": -46.6395,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Texto livre (sem diferenciar acentos)",
+            "schema": {
+              "example": "eletricista",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Slug da categoria (inclui subcategorias)",
+            "schema": {
+              "example": "servicos-gerais",
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DELIVERY",
+                "IN_STORE",
+                "AT_HOME",
+                "REMOTE"
+              ]
+            }
+          },
+          {
+            "name": "communityId",
+            "required": false,
+            "in": "query",
+            "description": "Comunidade do usuário, para cobertura do tipo COMMUNITY",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxDistanceM",
+            "required": false,
+            "in": "query",
+            "description": "Distância máxima para comércios presenciais e fornecedores sem cobertura declarada",
+            "schema": {
+              "minimum": 500,
+              "maximum": 50000,
+              "default": 15000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "includeNotServed",
+            "required": false,
+            "in": "query",
+            "description": "Incluir, separados, os que declaram não atender o endereço",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetros inválidos"
+          }
+        },
+        "summary": "Busca ofertas para um endereço",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/v1/categories": {
+      "get": {
+        "operationId": "CatalogController_categories_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/listings/{id}": {
+      "get": {
+        "operationId": "CatalogController_listing_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Com lat/lng, a resposta traz elegibilidade e distância",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "communityId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "summary": "Detalhe de uma oferta com contatos do fornecedor",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/listings/{id}/contact-events": {
+      "post": {
+        "operationId": "CatalogController_contact_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "summary": "Registra clique em Ligar / WhatsApp / Como chegar (métrica de conversão)",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/geocode": {
+      "get": {
+        "description": "Permite buscar sem GPS (LGPD: localização precisa só com autorização).",
+        "operationId": "GeocodingController_find_v1",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "Endereço ou CEP",
+            "schema": {
+              "example": "Rua Domingos de Morais, 2000, São Paulo",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeocodeResultDto"
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provedor de mapas indisponível"
+          }
+        },
+        "summary": "Converte endereço digitado ou CEP em coordenadas",
+        "tags": [
+          "geocoding"
+        ]
+      }
     }
   },
   "info": {
@@ -35,6 +330,341 @@
         "type": "http"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "CategorySummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name"
+        ]
+      },
+      "SearchProviderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BUSINESS",
+              "PROFESSIONAL"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "displayName"
+        ]
+      },
+      "SearchResultItemDto": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "DELIVERY",
+              "IN_STORE",
+              "AT_HOME",
+              "REMOTE"
+            ]
+          },
+          "eligibility": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "UNCONFIRMED",
+              "NOT_SERVED"
+            ],
+            "nullable": true,
+            "description": "Só para DELIVERY e AT_HOME. \"Atende seu endereço\" apenas quando CONFIRMED."
+          },
+          "distanceM": {
+            "type": "number",
+            "nullable": true
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategorySummaryDto"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/SearchProviderDto"
+          }
+        },
+        "required": [
+          "listingId",
+          "title",
+          "description",
+          "mode",
+          "eligibility",
+          "distanceM",
+          "category",
+          "provider"
+        ]
+      },
+      "SearchResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchResultItemDto"
+            }
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "hasMore"
+        ]
+      },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nome do ícone Material"
+          },
+          "sensitive": {
+            "type": "boolean",
+            "description": "Categoria com controles reforçados (ex.: cuidadores)"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "icon",
+          "sensitive",
+          "children"
+        ]
+      },
+      "GeoPointDto": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ]
+      },
+      "ProviderLocationDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/GeoPointDto"
+          }
+        },
+        "required": [
+          "address",
+          "location"
+        ]
+      },
+      "ListingProviderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BUSINESS",
+              "PROFESSIONAL"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "whatsapp": {
+            "type": "string",
+            "nullable": true,
+            "description": "Número no formato E.164, sem \"+\""
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderLocationDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "displayName",
+          "description",
+          "phone",
+          "whatsapp",
+          "locations"
+        ]
+      },
+      "ListingDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "DELIVERY",
+              "IN_STORE",
+              "AT_HOME",
+              "REMOTE"
+            ]
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategorySummaryDto"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ListingProviderDto"
+          },
+          "eligibility": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "UNCONFIRMED",
+              "NOT_SERVED"
+            ],
+            "nullable": true
+          },
+          "distanceM": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "mode",
+          "category",
+          "provider",
+          "eligibility",
+          "distanceM"
+        ]
+      },
+      "ContactEventDto": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "PHONE",
+              "WHATSAPP",
+              "DIRECTIONS"
+            ]
+          },
+          "communityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "GeocodeResultDto": {
+        "type": "object",
+        "properties": {
+          "formattedAddress": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/GeoPointDto"
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "formattedAddress",
+          "location",
+          "postalCode"
+        ]
+      }
+    }
   }
 }

@@ -11,13 +11,15 @@
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:migrate": "pnpm --filter @lume/api migrate",
-    "dev:api": "pnpm --filter @lume/api dev",
-    "dev:web": "pnpm --filter @lume/web dev",
-    "build": "pnpm -r build",
-    "typecheck": "pnpm --filter @lume/types build && pnpm -r typecheck",
-    "test": "pnpm --filter @lume/types build && pnpm -r test",
-    "test:e2e": "pnpm --filter @lume/api test:e2e",
-    "openapi": "pnpm --filter @lume/api openapi"
+    "db:seed:demo": "pnpm --filter @lume/api seed:demo",
+    "dev:api": "pnpm types && pnpm --filter @lume/api dev",
+    "dev:web": "pnpm types && pnpm --filter @lume/web dev",
+    "build": "pnpm types && pnpm -r build",
+    "typecheck": "pnpm types && pnpm -r typecheck",
+    "test": "pnpm types && pnpm -r test",
+    "test:e2e": "pnpm types && pnpm --filter @lume/api test:e2e",
+    "openapi": "pnpm types && pnpm --filter @lume/api openapi",
+    "types": "pnpm --filter @lume/types build"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
