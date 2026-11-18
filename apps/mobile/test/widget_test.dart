@@ -6,6 +6,7 @@ import 'package:http/testing.dart';
 import 'package:lume/main.dart';
 import 'package:lume/src/api_client.dart';
 import 'package:lume/src/models.dart';
+import 'package:lume/src/widgets/category_visuals.dart';
 import 'package:lume/src/widgets/eligibility_badge.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -119,7 +120,7 @@ void main() {
     await tester.tap(find.text('Rua Exemplo, 1 - São Paulo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('"mercado"'), findsOneWidget);
+    expect(find.text('Resultados para "mercado"'), findsOneWidget);
     final search = calls.lastWhere((u) => u.path == '/v1/search');
     expect(search.queryParameters, containsPair('q', 'mercado'));
     expect(search.queryParameters, containsPair('lat', '-23.5'));
@@ -131,7 +132,7 @@ void main() {
       initialAddress: const SelectedAddress(label: 'Casa', location: GeoPoint(-23.5, -46.6)),
     ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Mercado'));
+    await tester.tap(find.widgetWithText(CategoryTile, 'Mercado'));
     await tester.pumpAndSettle();
 
     expect(find.text('Entrega no seu endereço'), findsOneWidget);
@@ -154,7 +155,7 @@ void main() {
       initialAddress: const SelectedAddress(label: 'Casa', location: GeoPoint(0, 0)),
     ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Mercado'));
+    await tester.tap(find.widgetWithText(CategoryTile, 'Mercado'));
     await tester.pumpAndSettle();
     expect(find.text('Ninguém confirmou atendimento neste endereço ainda.'), findsOneWidget);
     expect(find.text('Ver também quem não atende'), findsOneWidget);
@@ -172,12 +173,12 @@ void main() {
       initialAddress: const SelectedAddress(label: 'Casa', location: GeoPoint(-23.5, -46.6)),
     ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Mercado'));
+    await tester.tap(find.widgetWithText(CategoryTile, 'Mercado'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Entrega de compras'));
+    await tester.tap(find.text('Entrega de compras').hitTestable());
     await tester.pumpAndSettle();
 
-    expect(find.text('Chamar no WhatsApp'), findsOneWidget);
+    expect(find.text('WhatsApp'), findsOneWidget);
     expect(find.text('Ligar'), findsOneWidget);
     expect(find.text('Como chegar'), findsOneWidget);
 
@@ -188,10 +189,31 @@ void main() {
     expect(calls.any((u) => u.path == '/v1/listings/l1/contact-events'), isTrue);
   });
 
+  testWidgets('início com endereço mostra destaques; abas Favoritos e Perfil avisam "em breve"', (tester) async {
+    await tester.pumpWidget(LumeApp(
+      api: ApiClient(baseUrl: 'http://t', client: fakeApi()),
+      initialAddress: const SelectedAddress(label: 'Casa', location: GeoPoint(-23.5, -46.6)),
+    ));
+    await tester.pumpAndSettle();
+    final homeList = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(find.text('Destaques na sua região'), 200, scrollable: homeList);
+    await tester.scrollUntilVisible(find.text('Entrega de compras'), 200, scrollable: homeList);
+    expect(find.text('Entrega de compras'), findsOneWidget);
+
+    await tester.tap(find.text('Favoritos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Em breve'), findsOneWidget);
+  });
+
   test('selo "atende" só com elegibilidade confirmada', () {
     expect(EligibilityBadge.describe(ServiceMode.atHome, Eligibility.confirmed).$1, 'Atende seu endereço');
     expect(EligibilityBadge.describe(ServiceMode.atHome, null).$1, 'Atendimento não confirmado');
     expect(EligibilityBadge.describe(ServiceMode.inStore, Eligibility.confirmed).$1, 'Ir até o local');
+  });
+
+  test('URL padrão da API por plataforma', () {
+    expect(ApiClient.defaultBaseUrl(android: true), 'http://10.0.2.2:3000');
+    expect(ApiClient.defaultBaseUrl(android: false), 'http://localhost:3000');
   });
 
   test('formata distância', () {

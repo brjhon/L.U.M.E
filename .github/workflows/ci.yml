@@ -60,6 +60,19 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+      - name: Screenshots das telas
+        run: flutter test test_screenshots --update-goldens
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: apps/mobile/test_screenshots/goldens/*.png
+          if-no-files-found: error
+      - name: Screenshots no log (revisão sem baixar artefato)
+        if: github.event_name == 'pull_request'
+        run: |
+          for f in test_screenshots/goldens/*.png; do
+            echo "PNGBEGIN $(basename "$f")"; base64 -w0 "$f"; echo; echo "PNGEND"
+          done
 
   docker:
     name: Imagem Docker da API
@@ -67,3 +80,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -f services/api/Dockerfile -t lume-api:ci .
+
+  android:
+    name: Build Android (APK)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # API_URL vem da variável do repositório (Settings > Variables). Sem ela, aponta para a API local.
+      - run: flutter build apk --release --dart-define=API_URL=${{ vars.API_URL }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lume-android-apk
+          path: apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+  ios:
+    name: Build iOS (sem assinatura)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # Prova que compila para iPhone. Instalar em aparelho exige conta Apple Developer (TestFlight).
+      - run: flutter build ios --release --no-codesign --dart-define=API_URL=${{ vars.API_URL }}

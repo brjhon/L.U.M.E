@@ -83,6 +83,7 @@ class SearchItem {
     required this.eligibility,
     required this.distanceM,
     required this.categoryName,
+    required this.categorySlug,
     required this.providerName,
   });
 
@@ -93,6 +94,7 @@ class SearchItem {
   final Eligibility? eligibility;
   final int? distanceM;
   final String categoryName;
+  final String categorySlug;
   final String providerName;
 
   factory SearchItem.fromJson(Map<String, dynamic> j) => SearchItem(
@@ -103,6 +105,7 @@ class SearchItem {
         eligibility: Eligibility.parse(j['eligibility']),
         distanceM: (j['distanceM'] as num?)?.round(),
         categoryName: (j['category'] as Map<String, dynamic>)['name'] as String,
+        categorySlug: (j['category'] as Map<String, dynamic>)['slug'] as String,
         providerName: (j['provider'] as Map<String, dynamic>)['displayName'] as String,
       );
 }
@@ -135,6 +138,7 @@ class ListingDetail {
     required this.eligibility,
     required this.distanceM,
     required this.categoryName,
+    required this.categorySlug,
     required this.providerName,
     required this.providerDescription,
     required this.phone,
@@ -149,6 +153,7 @@ class ListingDetail {
   final Eligibility? eligibility;
   final int? distanceM;
   final String categoryName;
+  final String categorySlug;
   final String providerName;
   final String? providerDescription;
   final String? phone;
@@ -165,6 +170,7 @@ class ListingDetail {
       eligibility: Eligibility.parse(j['eligibility']),
       distanceM: (j['distanceM'] as num?)?.round(),
       categoryName: (j['category'] as Map<String, dynamic>)['name'] as String,
+      categorySlug: (j['category'] as Map<String, dynamic>)['slug'] as String,
       providerName: p['displayName'] as String,
       providerDescription: p['description'] as String?,
       phone: p['phone'] as String?,

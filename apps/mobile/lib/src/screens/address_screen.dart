@@ -2,6 +2,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../api_client.dart';
 import '../models.dart';
+import '../theme.dart';
+import '../widgets/brand.dart';
 
 /// Endereço do condomínio de demonstração (pnpm db:seed:demo).
 const demoAddress = SelectedAddress(
@@ -68,57 +70,145 @@ class _AddressScreenState extends State<AddressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Onde você está?')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 24),
         children: [
-          TextField(
-            key: const Key('address-field'),
-            controller: _controller,
-            autofocus: true,
-            textInputAction: TextInputAction.search,
-            onSubmitted: (_) => _lookup(),
-            decoration: InputDecoration(
-              labelText: 'Endereço ou CEP',
-              hintText: 'Ex.: Rua Domingos de Morais, 2000 ou 04010-100',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                tooltip: 'Buscar endereço',
-                icon: const Icon(Icons.search),
-                onPressed: _loading ? null : _lookup,
-              ),
+          NavyHeader(
+            padding: const EdgeInsets.fromLTRB(4, 0, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  tooltip: 'Voltar',
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Onde você está?', style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white)),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Usamos o endereço só para encontrar quem atende você.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        key: const Key('address-field'),
+                        controller: _controller,
+                        autofocus: true,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: (_) => _lookup(),
+                        decoration: InputDecoration(
+                          hintText: 'Rua e número, ou CEP',
+                          prefixIcon: const Icon(Icons.location_on_outlined, color: LumeColors.orange),
+                          enabledBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                            borderSide: BorderSide.none,
+                          ),
+                          suffixIcon: IconButton(
+                            tooltip: 'Buscar endereço',
+                            icon: const Icon(Icons.search),
+                            onPressed: _loading ? null : _lookup,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Usamos o endereço só para encontrar quem atende você.',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          if (_loading) const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator())),
+          if (_loading) const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
           if (_error != null)
             Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Text(_error!, style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600)),
             ),
-          for (final r in _results ?? const <GeocodeResult>[])
-            ListTile(
-              leading: const Icon(Icons.place_outlined),
-              title: Text(r.formattedAddress),
-              onTap: () => _choose(SelectedAddress(label: r.formattedAddress, location: r.location)),
+          if ((_results ?? const []).isNotEmpty)
+            _Group(
+              title: 'Resultados',
+              children: [
+                for (final r in _results!)
+                  _AddressTile(
+                    icon: Icons.location_on_outlined,
+                    title: r.formattedAddress,
+                    onTap: () => _choose(SelectedAddress(label: r.formattedAddress, location: r.location)),
+                  ),
+              ],
             ),
-          if (_showDemo) ...[
-            const Divider(height: 32),
-            ListTile(
-              key: const Key('demo-address'),
-              leading: const Icon(Icons.apartment_outlined),
-              title: Text(demoAddress.label),
-              subtitle: const Text('Vila Mariana, São Paulo · dados de demonstração'),
-              onTap: () => _choose(demoAddress),
+          if (_showDemo)
+            _Group(
+              title: 'Demonstração',
+              children: [
+                _AddressTile(
+                  key: const Key('demo-address'),
+                  icon: Icons.apartment,
+                  title: demoAddress.label,
+                  subtitle: 'Vila Mariana, São Paulo · dados fictícios',
+                  onTap: () => _choose(demoAddress),
+                ),
+              ],
             ),
-          ],
         ],
       ),
     );
   }
+}
+
+class _Group extends StatelessWidget {
+  const _Group({required this.title, required this.children});
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+            ),
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var i = 0; i < children.length; i++) ...[
+                    if (i > 0) const Divider(indent: 56),
+                    children[i],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class _AddressTile extends StatelessWidget {
+  const _AddressTile({super.key, required this.icon, required this.title, this.subtitle, required this.onTap});
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(color: LumeColors.orangeSoft, borderRadius: BorderRadius.circular(10)),
+          child: Icon(icon, color: LumeColors.orange, size: 22),
+        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: subtitle == null ? null : Text(subtitle!),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
+      );
 }
