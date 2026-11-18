@@ -60,6 +60,13 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+      - name: Screenshots das telas
+        run: flutter test test_screenshots --update-goldens
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: apps/mobile/test_screenshots/goldens/*.png
+          if-no-files-found: error
 
   docker:
     name: Imagem Docker da API
