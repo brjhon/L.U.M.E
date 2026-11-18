@@ -1,0 +1,29 @@
+# Temporário: gera android/ e ios/ com o Flutter estável e devolve ao branch.
+name: Scaffold plataformas
+on:
+  push:
+    branches: ["scaffold/**"]
+permissions:
+  contents: write
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: flutter create
+        working-directory: apps/mobile
+        run: |
+          flutter --version
+          flutter create --org br.com.lume --project-name lume --platforms android,ios .
+          git status --short
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -q .github/workflows/scaffold.yml
+          git add apps/mobile/android apps/mobile/ios apps/mobile/.metadata
+          git commit -m "chore(mobile): projetos android/ e ios/ gerados pelo flutter create"
+          git push
