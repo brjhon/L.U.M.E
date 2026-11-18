@@ -140,7 +140,8 @@ void main() {
     expect(find.text('Não atende seu endereço'), findsNothing);
 
     final showAll = find.text('Mostrar também quem não atende este endereço');
-    await tester.scrollUntilVisible(showAll, 200);
+    final list = find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down);
+    await tester.scrollUntilVisible(showAll, 200, scrollable: list);
     await tester.tap(showAll);
     await tester.pumpAndSettle();
     expect(find.text('Não atendem seu endereço'), findsOneWidget); // seção separada
