@@ -1,89 +1,35 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'src/api_client.dart';
+import 'src/models.dart';
+import 'src/screens/home_screen.dart';
+import 'src/screens/results_screen.dart' show UrlOpener;
 import 'src/theme.dart';
 
-void main() => runApp(const LumeApp());
+void main() => runApp(LumeApp());
+
+Future<bool> _launchExternal(Uri uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
 
 class LumeApp extends StatelessWidget {
-  const LumeApp({super.key, this.api});
+  LumeApp({super.key, ApiClient? api, UrlOpener? openUrl, SelectedAddress? initialAddress})
+      : api = api ?? ApiClient(),
+        openUrl = openUrl ?? _launchExternal,
+        address = ValueNotifier<SelectedAddress?>(initialAddress);
 
-  final ApiClient? api;
+  final ApiClient api;
+  final UrlOpener openUrl;
+
+  /// Endereço escolhido para a busca (estado global simples do MVP).
+  final ValueNotifier<SelectedAddress?> address;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'L.U.M.E.',
+      debugShowCheckedModeBanner: false,
       theme: buildLumeTheme(),
-      home: HomeScreen(api: api ?? ApiClient()),
-    );
-  }
-}
-
-/// Categorias iniciais (as mesmas semeadas no banco).
-const _categories = <(String, IconData)>[
-  ('Mercados', Icons.shopping_basket_outlined),
-  ('Serviços', Icons.build_outlined),
-  ('Alimentação', Icons.restaurant_outlined),
-  ('Saúde', Icons.local_pharmacy_outlined),
-];
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.api});
-
-  final ApiClient api;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('L.U.M.E.')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            'Comércios e serviços locais perto de você',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 16),
-          const TextField(
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.search),
-              hintText: 'Buscar comércios ou serviços...',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              for (final (label, icon) in _categories)
-                Chip(avatar: Icon(icon, size: 18), label: Text(label)),
-            ],
-          ),
-          const SizedBox(height: 24),
-          FutureBuilder<Map<String, dynamic>>(
-            future: api.health(),
-            builder: (context, snap) {
-              if (snap.connectionState != ConnectionState.done) {
-                return const Text('Verificando API...');
-              }
-              if (snap.hasError) return const Text('API indisponível');
-              return Text('API: ${snap.data?['status']}');
-            },
-          ),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 0,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Início'),
-          NavigationDestination(icon: Icon(Icons.search), label: 'Buscar'),
-          NavigationDestination(icon: Icon(Icons.map_outlined), label: 'Mapa'),
-          NavigationDestination(icon: Icon(Icons.favorite_border), label: 'Favoritos'),
-          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Perfil'),
-        ],
-      ),
+      home: HomeScreen(api: api, address: address, openUrl: openUrl),
     );
   }
 }
