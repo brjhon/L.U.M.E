@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { loadEnv } from './config/env';
 import { HttpExceptionFilter } from './http-exception.filter';
 import { version } from './version';
 
@@ -10,6 +11,7 @@ export function configureApp(app: INestApplication): void {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.enableCors({ origin: loadEnv().corsOrigins });
   app.enableShutdownHooks();
 }
 

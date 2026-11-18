@@ -36,6 +36,77 @@ export interface HealthResponse {
   checks: { database: 'up' | 'down'; postgis: string | null };
 }
 
+/** Canais de contato registrados como conversão (cliques em Ligar/WhatsApp/Como chegar). */
+export const CONTACT_CHANNELS = ['PHONE', 'WHATSAPP', 'DIRECTIONS'] as const;
+export type ContactChannel = (typeof CONTACT_CHANNELS)[number];
+
+export interface GeoPoint {
+  lat: number;
+  lng: number;
+}
+
+export interface CategorySummary {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+export interface Category extends CategorySummary {
+  icon: string | null;
+  sensitive: boolean;
+  children: Category[];
+}
+
+/**
+ * Um resultado de busca.
+ * `eligibility` só existe para modos em que o fornecedor vai até o cliente (DELIVERY, AT_HOME).
+ * Para IN_STORE (o cliente vai até o local) e REMOTE, é `null` e a interface usa `mode`.
+ */
+export interface SearchResultItem {
+  listingId: string;
+  title: string;
+  description: string | null;
+  mode: ServiceMode;
+  eligibility: Eligibility | null;
+  /** Distância em metros até o endereço mais próximo do fornecedor, se ele tiver endereço. */
+  distanceM: number | null;
+  category: CategorySummary;
+  provider: { id: string; kind: ProviderKind; displayName: string };
+}
+
+export interface SearchResponse {
+  items: SearchResultItem[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface ListingDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  mode: ServiceMode;
+  category: CategorySummary;
+  provider: {
+    id: string;
+    kind: ProviderKind;
+    displayName: string;
+    description: string | null;
+    phone: string | null;
+    whatsapp: string | null;
+    locations: { address: string; location: GeoPoint }[];
+  };
+  /** Presente quando a consulta informa lat/lng. */
+  eligibility: Eligibility | null;
+  distanceM: number | null;
+}
+
+export interface GeocodeResult {
+  formattedAddress: string;
+  location: GeoPoint;
+  postalCode: string | null;
+}
+
 /** Formato padrão de erro da API (PDF, pág. 14). */
 export interface ApiError {
   statusCode: number;
