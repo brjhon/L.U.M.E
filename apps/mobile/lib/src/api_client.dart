@@ -69,6 +69,7 @@ class ApiClient {
     ServiceMode? mode,
     bool includeNotServed = false,
     int page = 1,
+    int pageSize = 20,
   }) async {
     final json = await _get(_uri('/search', {
       'lat': address.location.lat.toString(),
@@ -79,6 +80,7 @@ class ApiClient {
       'mode': mode?.api,
       'includeNotServed': includeNotServed ? 'true' : null,
       'page': '$page',
+      'pageSize': '$pageSize',
     }));
     return SearchPage.fromJson(json as Map<String, dynamic>);
   }

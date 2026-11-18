@@ -3,8 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'src/api_client.dart';
 import 'src/models.dart';
-import 'src/screens/home_screen.dart';
 import 'src/screens/results_screen.dart' show UrlOpener;
+import 'src/screens/shell.dart';
 import 'src/theme.dart';
 
 void main() => runApp(LumeApp());
@@ -29,7 +29,7 @@ class LumeApp extends StatelessWidget {
       title: 'L.U.M.E.',
       debugShowCheckedModeBanner: false,
       theme: buildLumeTheme(),
-      home: HomeScreen(api: api, address: address, openUrl: openUrl),
+      home: AppShell(api: api, address: address, openUrl: openUrl),
     );
   }
 }
