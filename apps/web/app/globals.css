@@ -1,0 +1,13 @@
+:root {
+  --navy: #0b2236;
+  --orange: #f58220;
+  --bg: #f5f7fa;
+  --text: #13202e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+header { background: var(--navy); color: #fff; padding: 16px 24px; border-bottom: 4px solid var(--orange); }
+main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+.cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.08); }
+.ok { color: #1a7f37; } .down { color: #c62828; }

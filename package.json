@@ -1,0 +1,25 @@
+{
+  "name": "lume",
+  "private": true,
+  "version": "0.1.0",
+  "description": "L.U.M.E. — Localizador Unificado de Mercados e Especialistas",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @lume/api migrate",
+    "dev:api": "pnpm --filter @lume/api dev",
+    "dev:web": "pnpm --filter @lume/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm --filter @lume/types build && pnpm -r typecheck",
+    "test": "pnpm --filter @lume/types build && pnpm -r test",
+    "test:e2e": "pnpm --filter @lume/api test:e2e",
+    "openapi": "pnpm --filter @lume/api openapi"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

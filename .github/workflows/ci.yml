@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: API + Web (tipos, testes, build)
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: lume
+          POSTGRES_PASSWORD: lume
+          POSTGRES_DB: lume
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U lume -d lume"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://lume:lume@localhost:5432/lume
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm db:migrate
+      - run: pnpm test:e2e
+      - name: Contrato OpenAPI atualizado
+        run: |
+          pnpm openapi
+          git diff --exit-code docs/openapi.json || (echo "Rode 'pnpm openapi' e commite docs/openapi.json" && exit 1)
+      - run: pnpm build
+
+  mobile:
+    name: App Flutter (análise e testes)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  docker:
+    name: Imagem Docker da API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f services/api/Dockerfile -t lume-api:ci .
