@@ -16,7 +16,7 @@ docs/            Contrato OpenAPI e decisões de arquitetura
 
 ## Começando
 
-Requisitos: Node 22, pnpm 10 (`corepack enable`), Docker. Flutter 3.24+ para o app.
+Requisitos: Node 22, pnpm 10 (`corepack enable`), Docker. Flutter 3.47+ para o app.
 
 ```bash
 cp .env.example .env
