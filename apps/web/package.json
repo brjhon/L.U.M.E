@@ -1,0 +1,25 @@
+{
+  "name": "@lume/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Painel web único: administração da plataforma e área do parceiro (acesso por papel).",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"sem testes ainda\""
+  },
+  "dependencies": {
+    "@lume/types": "workspace:*",
+    "next": "^15.5.29",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  }
+}
