@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return a == null ? null : widget.api.search(address: a, pageSize: 3);
   }
 
-  void _loadHighlights() => setState(() => _highlights = _fetchHighlights());
+  void _loadHighlights() => setState(() { _highlights = _fetchHighlights(); });
 
   Future<bool> _pickAddress() async {
     final picked = await Navigator.of(context).push<bool>(
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          setState(() => _categories = widget.api.categories());
+          setState(() { _categories = widget.api.categories(); });
           _loadHighlights();
         },
         child: ListView(
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return EmptyState(
                       icon: Icons.cloud_off,
                       title: 'Não foi possível carregar as categorias.',
-                      action: ('Tentar de novo', () => setState(() => _categories = widget.api.categories())),
+                      action: ('Tentar de novo', () => setState(() { _categories = widget.api.categories(); })),
                     );
                   }
                   return GridView.count(

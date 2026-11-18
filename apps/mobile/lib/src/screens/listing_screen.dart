@@ -62,7 +62,7 @@ class _ListingScreenState extends State<ListingScreen> {
                     title: err is ApiException && err.statusCode == 404
                         ? 'Esta oferta não está mais disponível.'
                         : 'Não foi possível carregar.',
-                    action: ('Tentar de novo', () => setState(() => _future = _load())),
+                    action: ('Tentar de novo', () => setState(() { _future = _load(); })),
                   ),
                 ),
               ],
