@@ -188,8 +188,11 @@ void main() {
     await boot(tester);
     await tester.pumpAndSettle();
     final card = find.text('Mercadinho Bom Preço');
-    await tester.scrollUntilVisible(card, 200, scrollable: find.byType(Scrollable).first);
-    await tester.tap(card);
+    final list = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(card, 200, scrollable: list);
+    await tester.drag(list, const Offset(0, -250)); // tira o card de trás da barra inferior
+    await tester.pumpAndSettle();
+    await tester.tap(card.hitTestable());
     await _shot(tester, '05_detalhe');
   });
 
@@ -210,8 +213,11 @@ void main() {
     await boot(tester, iphone: true);
     await tester.pumpAndSettle();
     final card = find.text('Mercadinho Bom Preço');
-    await tester.scrollUntilVisible(card, 200, scrollable: find.byType(Scrollable).first);
-    await tester.tap(card);
+    final list = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(card, 200, scrollable: list);
+    await tester.drag(list, const Offset(0, -250)); // tira o card de trás da barra inferior
+    await tester.pumpAndSettle();
+    await tester.tap(card.hitTestable());
     await _shot(tester, '08_iphone_detalhe');
   }, variant: iphone);
 }
