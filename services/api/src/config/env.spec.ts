@@ -37,6 +37,7 @@ describe('loadEnv', () => {
       DATABASE_URL: 'postgres://lume:Xk29fj3lQp@db:5432/lume',
       CORS_ORIGINS: 'https://painel.exemplo.com.br',
       GEOCODER_USER_AGENT: 'lume (ops@exemplo.com.br)',
+      JWT_ACCESS_SECRET: 'a3f9c1d7e5b2a8f4c6d0e9b1a7f3c5d2e8b4a6f0c1d9e7b3',
     };
 
     it('aceita configuração completa', () => {
@@ -52,6 +53,14 @@ describe('loadEnv', () => {
     it('recusa senha padrão do banco', () => {
       expect(() => loadEnv({ ...prod, DATABASE_URL: 'postgres://lume:lume@db:5432/lume' })).toThrow(
         /senha padrão/,
+      );
+    });
+
+    it('exige segredo JWT forte', () => {
+      expect(() => loadEnv({ ...prod, JWT_ACCESS_SECRET: '' })).toThrow(/JWT_ACCESS_SECRET/);
+      expect(() => loadEnv({ ...prod, JWT_ACCESS_SECRET: 'curto' })).toThrow(/JWT_ACCESS_SECRET/);
+      expect(() => loadEnv({ ...prod, JWT_ACCESS_SECRET: 'troque-isto'.padEnd(40, 'x') })).toThrow(
+        /JWT_ACCESS_SECRET/,
       );
     });
 

@@ -55,6 +55,7 @@ produção com configuração insegura (senha padrão, CORS aberto, geocodifica�
 | `pnpm typecheck` | Checagem de tipos em todos os pacotes |
 | `pnpm test` | Testes unitários |
 | `pnpm test:e2e` | Testes da API contra o PostGIS real (precisa de `pnpm db:up`) |
+| `ADMIN_EMAIL=... ADMIN_NAME=... pnpm --filter @lume/api create-admin` | Cria ou promove um administrador (senha pedida no terminal) |
 | `pnpm db:seed:demo` | Recria os dados de demonstração (recusa com `NODE_ENV=production`) |
 | `pnpm openapi` | Regenera `docs/openapi.json` (a CI falha se estiver desatualizado) |
 | `pnpm build` | Build de produção da API e do painel |

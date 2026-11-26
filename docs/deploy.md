@@ -74,16 +74,30 @@ Crie dois registros **A** apontando para o IP da VPS, por exemplo `api.seudomini
 git clone https://github.com/<sua-conta>/L.U.M.E.git lume && cd lume
 cp .env.production.example .env.production
 openssl rand -hex 24          # cole como POSTGRES_PASSWORD
+openssl rand -hex 32          # cole como JWT_ACCESS_SECRET
 nano .env.production          # domínios, e-mail, chave do Google
 chmod 600 .env.production
 
-docker compose -f deploy/docker-compose.prod.yml --env-file .env.production up -d --build
-docker compose -f deploy/docker-compose.prod.yml --env-file .env.production ps
+# Atalho para os comandos abaixo (coloque no ~/.bashrc para ficar permanente)
+alias lume='docker compose -f ~/lume/deploy/docker-compose.prod.yml --env-file ~/lume/.env.production'
+
+lume up -d --build
+lume ps
 curl https://api.seudominio.com.br/v1/health
 ```
 
-A API **recusa subir** em produção com senha padrão do banco, CORS aberto/localhost ou sem
-contato para o OpenStreetMap. A mensagem aparece em `logs api`.
+A API **recusa subir** em produção com senha padrão do banco, segredo JWT fraco, CORS
+aberto/localhost ou sem contato para o OpenStreetMap. A mensagem aparece em `logs api`.
+
+### Primeiro administrador
+
+Não existe cadastro público de admin. Crie pela linha de comando (a senha é pedida sem eco):
+
+```bash
+lume run --rm -it -e ADMIN_EMAIL=voce@seudominio.com.br -e ADMIN_NAME="Seu Nome"   api node dist/database/create-admin.js
+```
+
+Se o e-mail já tiver conta, ela só é promovida a administrador.
 
 Dados de demonstração **não** entram em produção (o seed recusa `NODE_ENV=production`).
 
@@ -98,8 +112,6 @@ docker image prune -f
 As migrações novas rodam sozinhas antes da API reiniciar; se uma falhar, a versão nova não sobe
 (`logs migrate` mostra o motivo).
 
-Atalho útil: `alias lume='docker compose -f ~/lume/deploy/docker-compose.prod.yml --env-file ~/lume/.env.production'`
-e depois `lume ps`, `lume logs -f api`, `lume restart web`.
 
 ## Backup e restauração
 

@@ -5,6 +5,7 @@ import { Throttle } from '@nestjs/throttler';
 import { IsString, MaxLength, MinLength } from 'class-validator';
 import { GeoPointDto } from '../catalog/catalog.dto';
 import { GeocodingService } from './geocoding.service';
+import { Public } from '../auth/decorators';
 
 export class GeocodeQueryDto {
   @ApiProperty({ example: 'Rua Domingos de Morais, 2000, São Paulo', description: 'Endereço ou CEP' })
@@ -21,6 +22,7 @@ export class GeocodeResultDto implements GeocodeResult {
 }
 
 @ApiTags('geocoding')
+@Public()
 @Controller({ path: 'geocode', version: '1' })
 export class GeocodingController {
   constructor(private readonly geocoding: GeocodingService) {}

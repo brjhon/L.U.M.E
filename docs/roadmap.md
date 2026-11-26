@@ -8,9 +8,15 @@ relacional completo, API NestJS com `/v1/health`, formato padrão de erro, valid
 OpenAPI em `/docs` e `docs/openapi.json`, painel Next.js, esqueleto Flutter, CI no GitHub Actions
 e imagem Docker da API.
 
-## Sprint 1: identidade e território
-- `POST /v1/auth/register|login|refresh|logout` com JWT curto + refresh rotativo e revogável.
-- `GET/PATCH /v1/me`, `GET/POST /v1/me/addresses`.
+## Sprint 1: identidade e território (autenticação ✅)
+- ✅ `POST /v1/auth/register|login|refresh|logout`: JWT HS256 de 15 min + refresh token opaco
+  (só o hash SHA-256 no banco), rotativo, com detecção de reuso que encerra a família inteira.
+- ✅ `GET/PATCH /v1/me`, `POST /v1/me/password` (encerra as outras sessões).
+- ✅ Senhas com Argon2id (parâmetros OWASP); login com tempo constante para não revelar e-mails.
+- ✅ Guard global: toda rota exige login, exceto as marcadas `@Public()`; papel e status lidos do
+  banco a cada requisição (bloqueio e troca de papel valem na hora). `@Roles(...)` por rota.
+- ✅ Primeiro admin só pela linha de comando (`create-admin`), nunca por HTTP.
+- `GET/POST /v1/me/addresses`.
 - Geocodificação só ao salvar endereço (Google Geocoding), com o ponto guardado no banco.
 - Comunidades, pedidos de entrada e aprovação por COMMUNITY_ADMIN.
 - RBAC: guard por papel global + escopo de comunidade.

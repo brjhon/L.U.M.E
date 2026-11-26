@@ -2,8 +2,10 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchQueryDto, SearchResponseDto } from './search.dto';
 import { SearchService } from './search.service';
+import { Public } from '../auth/decorators';
 
 @ApiTags('search')
+@Public()
 @Controller({ path: 'search', version: '1' })
 export class SearchController {
   constructor(private readonly search: SearchService) {}

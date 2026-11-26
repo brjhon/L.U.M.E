@@ -115,3 +115,31 @@ export interface ApiError {
   path: string;
   timestamp: string;
 }
+
+/** Papel global gravado no usuário (tabela users). MEMBER e COMMUNITY_ADMIN vêm do vínculo com a comunidade. */
+export const PLATFORM_ROLES = ['USER', 'PARTNER', 'PLATFORM_ADMIN'] as const;
+export type PlatformRole = (typeof PLATFORM_ROLES)[number];
+
+/** Usuário autenticado (GET /v1/me). */
+export interface Me {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: PlatformRole;
+  createdAt: string;
+}
+
+/**
+ * Resposta de login, cadastro e renovação.
+ * O token de acesso vai no cabeçalho `Authorization: Bearer`. O refresh token é guardado com
+ * segurança pelo cliente e trocado em /v1/auth/refresh; cada troca invalida o anterior.
+ */
+export interface AuthResponse {
+  accessToken: string;
+  /** Segundos até o token de acesso expirar. */
+  expiresIn: number;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
+  user: Me;
+}

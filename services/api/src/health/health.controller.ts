@@ -5,8 +5,10 @@ import type { Response } from 'express';
 import { Pool } from 'pg';
 import { PG_POOL } from '../database/database.module';
 import { version } from '../version';
+import { Public } from '../auth/decorators';
 
 @ApiTags('health')
+@Public()
 @Controller({ path: 'health', version: '1' })
 export class HealthController {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}

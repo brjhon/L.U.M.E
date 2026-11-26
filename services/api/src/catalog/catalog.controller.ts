@@ -9,8 +9,10 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { CategoryDto, ContactEventDto, ListingDetailDto, ListingDetailQueryDto } from './catalog.dto';
 import { CatalogService } from './catalog.service';
+import { Public } from '../auth/decorators';
 
 @ApiTags('catalog')
+@Public()
 @Controller({ version: '1' })
 export class CatalogController {
   constructor(private readonly catalog: CatalogService) {}
