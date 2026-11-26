@@ -1,0 +1,150 @@
+# Stack de produção do L.U.M.E. para uma VPS com Docker.
+# Uso (na raiz do repositório, na VPS):
+#   docker compose -f deploy/docker-compose.prod.yml --env-file .env.production up -d --build
+# Guia completo: docs/deploy.md
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  # Proxy reverso: HTTPS automático (Let's Encrypt), HSTS e compressão. Única porta exposta.
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:?defina ACME_EMAIL}
+      API_DOMAIN: ${API_DOMAIN:?defina API_DOMAIN}
+      PAINEL_DOMAIN: ${PAINEL_DOMAIN:?defina PAINEL_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_started
+    logging: *logging
+
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    # Sem "ports": o banco só é acessível pela rede interna do Docker.
+    environment:
+      POSTGRES_USER: lume
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD}
+      POSTGRES_DB: lume
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lume -d lume"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # Ajuste para VPS de 4 GB / 2 vCPU (KingHost). Para outra máquina, mude pelas variáveis PG_*.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=${PG_SHARED_BUFFERS:-512MB}
+      - -c
+      - effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE:-1536MB}
+      - -c
+      - work_mem=${PG_WORK_MEM:-8MB}
+      - -c
+      - maintenance_work_mem=${PG_MAINTENANCE_WORK_MEM:-128MB}
+      - -c
+      - max_connections=${PG_MAX_CONNECTIONS:-50}
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - log_min_duration_statement=${PG_LOG_SLOW_MS:-500}
+    shm_size: 512m
+    deploy:
+      resources:
+        limits:
+          memory: ${DB_MEMORY_LIMIT:-1536m}
+    logging: *logging
+
+  # Roda as migrações pendentes uma vez e sai; a API só sobe se elas passarem.
+  migrate:
+    image: lume-api:local
+    build:
+      context: ..
+      dockerfile: services/api/Dockerfile
+    command: ["node", "dist/database/migrate.js"]
+    environment:
+      DATABASE_URL: postgres://lume:${POSTGRES_PASSWORD}@db:5432/lume
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    logging: *logging
+
+  api:
+    image: lume-api:local
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+      API_PORT: 3000
+      DATABASE_URL: postgres://lume:${POSTGRES_PASSWORD}@db:5432/lume
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
+      CORS_ORIGINS: https://${PAINEL_DOMAIN}
+      TRUST_PROXY: 1
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      GEOCODER_USER_AGENT: ${GEOCODER_USER_AGENT:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          memory: ${API_MEMORY_LIMIT:-512m}
+    logging: *logging
+
+  web:
+    image: lume-web:local
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      API_INTERNAL_URL: http://api:3000
+    deploy:
+      resources:
+        limits:
+          memory: ${WEB_MEMORY_LIMIT:-512m}
+    logging: *logging
+
+  # Backup diário do banco (pg_dump, formato custom) com retenção em dias.
+  backup:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: lume
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: lume
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:

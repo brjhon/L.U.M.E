@@ -1,6 +1,9 @@
 import type { HealthResponse } from '@lume/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+// Lido no servidor a cada requisição. Em contêiner, aponta para a rede interna (http://api:3000);
+// NEXT_PUBLIC_* seria fixado no build e não serviria para imagens reaproveitadas entre ambientes.
+const API_URL =
+  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
 async function getHealth(): Promise<HealthResponse | null> {
   try {
@@ -35,7 +38,7 @@ export default async function Home() {
                 {health.status} · v{health.version} · PostGIS {health.checks.postgis ?? '—'}
               </p>
             ) : (
-              <p className="down">API fora do ar em {API_URL}</p>
+              <p className="down">API fora do ar</p>
             )}
           </section>
           <section className="card">

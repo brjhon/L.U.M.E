@@ -9,7 +9,10 @@ export const PG_POOL = Symbol('PG_POOL');
   providers: [
     {
       provide: PG_POOL,
-      useFactory: () => new Pool({ connectionString: loadEnv().databaseUrl, max: 10 }),
+      useFactory: () => {
+        const env = loadEnv();
+        return new Pool({ connectionString: env.databaseUrl, max: env.databasePoolMax });
+      },
     },
   ],
   exports: [PG_POOL],

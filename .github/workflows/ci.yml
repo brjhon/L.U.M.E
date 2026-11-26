@@ -62,8 +62,19 @@ jobs:
       - run: flutter test
 
   docker:
-    name: Imagem Docker da API
+    name: Imagens Docker e stack de produção
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: docker build -f services/api/Dockerfile -t lume-api:ci .
+      - run: docker build -f apps/web/Dockerfile -t lume-web:ci .
+      - name: Compose de produção válido
+        run: |
+          cp .env.production.example .env.ci
+          sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci0123456789/' .env.ci
+          docker compose -f deploy/docker-compose.prod.yml --env-file .env.ci config --quiet
+      - name: API recusa configuração insegura em produção
+        run: |
+          if docker run --rm -e NODE_ENV=production -e DATABASE_URL=postgres://lume:lume@db/lume lume-api:ci; then
+            echo "A API subiu com configuração insegura" && exit 1
+          fi

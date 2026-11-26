@@ -42,6 +42,12 @@ Sem `GOOGLE_MAPS_API_KEY`, o `/v1/geocode` usa o OpenStreetMap (Nominatim), só 
 desenvolvimento. Defina `DEMO_PHONE=55119...` antes do seed para os botões de contato
 abrirem o seu número.
 
+## Produção
+
+Stack em Docker para VPS (Caddy com HTTPS automático, migrações antes da subida, banco sem
+porta exposta, backup diário): veja **[docs/deploy.md](docs/deploy.md)**. A API recusa subir em
+produção com configuração insegura (senha padrão, CORS aberto, geocodificação sem contato).
+
 ## Comandos
 
 | Comando | O que faz |

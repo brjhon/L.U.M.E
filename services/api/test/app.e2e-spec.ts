@@ -39,6 +39,13 @@ describe('API L.U.M.E. (e2e)', () => {
     expect(res.body.checks.postgis).toMatch(/^\d+\.\d+/);
   });
 
+  it('envia cabeçalhos de segurança e esconde a tecnologia do servidor', async () => {
+    const res = await request(app.getHttpServer()).get('/v1/health').expect(200);
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-frame-options']).toBeDefined();
+    expect(res.headers['x-powered-by']).toBeUndefined();
+  });
+
   it('rota inexistente devolve erro no formato padrão', async () => {
     const res = await request(app.getHttpServer()).get('/v1/nao-existe').expect(404);
     expect(res.body).toMatchObject({ statusCode: 404, path: '/v1/nao-existe' });
