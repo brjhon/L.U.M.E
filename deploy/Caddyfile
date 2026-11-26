@@ -1,0 +1,29 @@
+# Domínios e e-mail vêm do .env.production (API_DOMAIN, PAINEL_DOMAIN, ACME_EMAIL).
+{
+	email {$ACME_EMAIL}
+}
+
+(seguranca) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	log {
+		output stdout
+		format json
+	}
+}
+
+{$API_DOMAIN} {
+	import seguranca
+	request_body {
+		max_size 1MB
+	}
+	reverse_proxy api:3000
+}
+
+{$PAINEL_DOMAIN} {
+	import seguranca
+	reverse_proxy web:3001
+}

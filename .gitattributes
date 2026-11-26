@@ -1,0 +1,5 @@
+# Scripts e configs executados em Linux (VPS/contêiner) precisam de LF.
+*.sh text eol=lf
+deploy/Caddyfile text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
