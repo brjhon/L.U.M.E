@@ -44,6 +44,7 @@ describe('Autenticação (e2e)', () => {
       get: (url: string) => agent.get(url).set('X-Forwarded-For', ip),
       post: (url: string) => agent.post(url).set('X-Forwarded-For', ip),
       patch: (url: string) => agent.patch(url).set('X-Forwarded-For', ip),
+      delete: (url: string) => agent.delete(url).set('X-Forwarded-For', ip),
     };
   };
   const newEmail = () => `teste-${randomUUID()}@exemplo.com.br`;
@@ -195,6 +196,90 @@ describe('Autenticação (e2e)', () => {
     ).body;
     expect(admin.user.role).toBe('PLATFORM_ADMIN');
     await http().get('/v1/test-admin-only').set('Authorization', `Bearer ${admin.accessToken}`).expect(200);
+  });
+
+  describe('exclusão de conta', () => {
+    it('apaga e anonimiza os dados pessoais e encerra as sessões', async () => {
+      const email = newEmail();
+      const { accessToken, refreshToken, user } = await register(email);
+      await http().patch('/v1/me').set('Authorization', `Bearer ${accessToken}`).send({ phone: '5511977776666' }).expect(200);
+
+      // Dados ligados à pessoa: endereço, favorito, fornecedor próprio com oferta.
+      const cat = await pool.query(`SELECT id FROM categories WHERE slug = 'eletricista'`);
+      await pool.query(
+        `INSERT INTO addresses (user_id, label, formatted_address, location)
+         VALUES ($1, 'Casa', 'Rua Teste, 1', ST_MakePoint(-46.63, -23.55)::geography)`,
+        [user.id],
+      );
+      const prov = await pool.query(
+        `INSERT INTO providers (owner_user_id, kind, display_name, phone, whatsapp, status)
+         VALUES ($1, 'PROFESSIONAL', 'Elétrica do Teste', '5511900000000', '5511900000000', 'APPROVED') RETURNING id`,
+        [user.id],
+      );
+      const listing = await pool.query(
+        `INSERT INTO listings (provider_id, category_id, title, mode, status)
+         VALUES ($1, $2, 'Reparos', 'AT_HOME', 'APPROVED') RETURNING id`,
+        [prov.rows[0].id, cat.rows[0].id],
+      );
+      await pool.query(`INSERT INTO favorites (user_id, listing_id) VALUES ($1, $2)`, [user.id, listing.rows[0].id]);
+
+      await http().delete('/v1/me').set('Authorization', `Bearer ${accessToken}`).send({ password: 'errada-errada' }).expect(401);
+      await http().delete('/v1/me').set('Authorization', `Bearer ${accessToken}`).send({ password: PASSWORD }).expect(204);
+
+      const u = (await pool.query('SELECT * FROM users WHERE id = $1', [user.id])).rows[0];
+      expect(u).toMatchObject({ email: null, phone: null, password_hash: null, status: 'DELETED', name: 'Conta excluída' });
+      expect(u.deleted_at).not.toBeNull();
+      const count = async (sql: string) => (await pool.query(sql, [user.id])).rows[0].n;
+      expect(await count('SELECT count(*)::int AS n FROM addresses WHERE user_id = $1')).toBe(0);
+      expect(await count('SELECT count(*)::int AS n FROM favorites WHERE user_id = $1')).toBe(0);
+      expect(await count('SELECT count(*)::int AS n FROM refresh_tokens WHERE user_id = $1')).toBe(0);
+      const p = (await pool.query('SELECT * FROM providers WHERE id = $1', [prov.rows[0].id])).rows[0];
+      expect(p).toMatchObject({ status: 'SUSPENDED', phone: null, whatsapp: null });
+      expect(p.deleted_at).not.toBeNull();
+
+      // Sessões encerradas, login impossível, e o e-mail fica livre para um cadastro novo.
+      await http().get('/v1/me').set('Authorization', `Bearer ${accessToken}`).expect(401);
+      await http().post('/v1/auth/refresh').send({ refreshToken }).expect(401);
+      await http().post('/v1/auth/login').send({ email, password: PASSWORD }).expect(401);
+      await register(email);
+    });
+
+    it('oferta de quem excluiu a conta some da busca e do detalhe', async () => {
+      const { accessToken, user } = await register();
+      const cat = await pool.query(`SELECT id FROM categories WHERE slug = 'eletricista'`);
+      const prov = await pool.query(
+        `INSERT INTO providers (owner_user_id, kind, display_name, status) VALUES ($1, 'PROFESSIONAL', 'Some Daqui', 'APPROVED') RETURNING id`,
+        [user.id],
+      );
+      const listing = await pool.query(
+        `INSERT INTO listings (provider_id, category_id, title, mode, status) VALUES ($1, $2, 'Oferta que some', 'REMOTE', 'APPROVED') RETURNING id`,
+        [prov.rows[0].id, cat.rows[0].id],
+      );
+      await http().get(`/v1/listings/${listing.rows[0].id}`).expect(200);
+      await http().delete('/v1/me').set('Authorization', `Bearer ${accessToken}`).send({ password: PASSWORD }).expect(204);
+      await http().get(`/v1/listings/${listing.rows[0].id}`).expect(404);
+    });
+
+    it('o único administrador não consegue excluir a própria conta', async () => {
+      // Isola o cenário: rebaixa temporariamente os outros admins criados por testes.
+      const client = await pool.connect();
+      try {
+        const email = newEmail();
+        await createAdmin(DATABASE_URL, email, 'Admin Único', async () => 'senha-de-admin-forte', () => undefined);
+        const admin: AuthResponse = (await http().post('/v1/auth/login').send({ email, password: 'senha-de-admin-forte' }).expect(200)).body;
+        const others = await client.query(
+          `UPDATE users SET role = 'USER' WHERE role = 'PLATFORM_ADMIN' AND id <> $1 RETURNING id`,
+          [admin.user.id],
+        );
+        try {
+          await http().delete('/v1/me').set('Authorization', `Bearer ${admin.accessToken}`).send({ password: 'senha-de-admin-forte' }).expect(403);
+        } finally {
+          await client.query(`UPDATE users SET role = 'PLATFORM_ADMIN' WHERE id = ANY($1)`, [others.rows.map((r) => r.id)]);
+        }
+      } finally {
+        client.release();
+      }
+    });
   });
 
   it('rotas públicas continuam abertas', async () => {

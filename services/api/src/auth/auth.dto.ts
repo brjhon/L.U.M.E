@@ -91,6 +91,13 @@ export class ChangePasswordDto {
   newPassword!: string;
 }
 
+export class DeleteAccountDto {
+  @ApiProperty({ description: 'Senha atual, para confirmar que é o dono da conta' })
+  @IsString()
+  @MaxLength(PASSWORD_MAX)
+  password!: string;
+}
+
 export class MeDto implements Me {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() name!: string;

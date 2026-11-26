@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   Logger,
@@ -189,6 +190,73 @@ export class AuthService {
         [userId],
       );
       return this.issue(db, user);
+    });
+  }
+
+  /**
+   * Exclui a conta: apaga ou anonimiza todo dado pessoal e encerra todas as sessões.
+   * A linha em `users` fica, sem dados, para não quebrar referências (ex.: auditoria).
+   * Não tem volta: o e-mail fica livre para um cadastro novo.
+   */
+  async deleteAccount(userId: string, password: string): Promise<void> {
+    const user = await this.findUser(this.pool, userId);
+    if (!user || !(await verifyPassword(user.password_hash, password))) {
+      throw new UnauthorizedException('Senha incorreta');
+    }
+    await this.transaction(async (db) => {
+      if (user.role === 'PLATFORM_ADMIN') {
+        const { rows } = await db.query<{ n: number }>(
+          `SELECT count(*)::int AS n FROM users
+            WHERE role = 'PLATFORM_ADMIN' AND deleted_at IS NULL AND id <> $1`,
+          [userId],
+        );
+        if (rows[0].n === 0) {
+          throw new ForbiddenException('Você é o único administrador. Promova outra conta antes de excluir esta.');
+        }
+      }
+      // Dados que só fazem sentido com o dono: somem.
+      await db.query('DELETE FROM refresh_tokens WHERE user_id = $1', [userId]);
+      await db.query('DELETE FROM favorites WHERE user_id = $1', [userId]);
+      await db.query('DELETE FROM memberships WHERE user_id = $1', [userId]);
+      await db.query(
+        `DELETE FROM addresses a WHERE a.user_id = $1
+            AND NOT EXISTS (SELECT 1 FROM service_requests sr WHERE sr.address_id = a.id)`,
+        [userId],
+      );
+      // Endereços citados em solicitações ficam, mas sem dono e sem texto identificável.
+      await db.query(
+        `UPDATE addresses SET user_id = NULL, label = NULL, formatted_address = '[removido]', postal_code = NULL
+          WHERE user_id = $1`,
+        [userId],
+      );
+      // Conteúdo escrito pela pessoa: o texto sai, os números (nota, contagem) ficam.
+      await db.query('UPDATE reviews SET text = NULL WHERE user_id = $1', [userId]);
+      await db.query(
+        `UPDATE service_requests SET description = '[removido]' WHERE requester_user_id = $1`,
+        [userId],
+      );
+      await db.query('UPDATE contact_events SET user_id = NULL WHERE user_id = $1', [userId]);
+      // Fornecedores da pessoa saem do ar junto com as ofertas.
+      await db.query(
+        `UPDATE listings SET deleted_at = now()
+          WHERE deleted_at IS NULL AND provider_id IN (SELECT id FROM providers WHERE owner_user_id = $1)`,
+        [userId],
+      );
+      await db.query(
+        `UPDATE providers SET deleted_at = now(), status = 'SUSPENDED', phone = NULL, whatsapp = NULL
+          WHERE owner_user_id = $1 AND deleted_at IS NULL`,
+        [userId],
+      );
+      await db.query(
+        `UPDATE users SET email = NULL, phone = NULL, name = 'Conta excluída', password_hash = NULL,
+                status = 'DELETED', deleted_at = now(), password_changed_at = date_trunc('second', now())
+          WHERE id = $1`,
+        [userId],
+      );
+      await db.query(
+        `INSERT INTO audit_logs (actor_id, action, entity, entity_id) VALUES ($1, 'user.deleted', 'user', $1)`,
+        [userId],
+      );
     });
   }
 

@@ -16,6 +16,8 @@ e imagem Docker da API.
 - ✅ Guard global: toda rota exige login, exceto as marcadas `@Public()`; papel e status lidos do
   banco a cada requisição (bloqueio e troca de papel valem na hora). `@Roles(...)` por rota.
 - ✅ Primeiro admin só pela linha de comando (`create-admin`), nunca por HTTP.
+- ✅ `DELETE /v1/me`: exclusão de conta com senha (LGPD; exigência da App Store). Apaga ou
+  anonimiza dados pessoais, tira do ar os fornecedores da pessoa e encerra as sessões.
 - `GET/POST /v1/me/addresses`.
 - Geocodificação só ao salvar endereço (Google Geocoding), com o ponto guardado no banco.
 - Comunidades, pedidos de entrada e aprovação por COMMUNITY_ADMIN.

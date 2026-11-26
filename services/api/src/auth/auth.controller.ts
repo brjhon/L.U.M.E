@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Patch, Post } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
@@ -14,6 +15,7 @@ import { Throttle } from '@nestjs/throttler';
 import {
   AuthResponseDto,
   ChangePasswordDto,
+  DeleteAccountDto,
   LoginDto,
   MeDto,
   RefreshDto,
@@ -98,5 +100,20 @@ export class MeController {
   @ApiOkResponse({ type: AuthResponseDto })
   changePassword(@CurrentUser() user: AuthUser, @Body() dto: ChangePasswordDto): Promise<AuthResponseDto> {
     return this.auth.changePassword(user.id, dto.currentPassword, dto.newPassword);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({
+    summary: 'Exclui a conta e os dados pessoais (LGPD)',
+    description:
+      'Exige a senha. Apaga endereços, favoritos e vínculos; anonimiza avaliações e solicitações; ' +
+      'tira do ar os fornecedores da pessoa; encerra todas as sessões. Não tem volta.',
+  })
+  @ApiNoContentResponse()
+  @ApiForbiddenResponse({ description: 'Único administrador da plataforma' })
+  async deleteAccount(@CurrentUser() user: AuthUser, @Body() dto: DeleteAccountDto): Promise<void> {
+    await this.auth.deleteAccount(user.id, dto.password);
   }
 }

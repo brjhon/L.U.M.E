@@ -204,6 +204,41 @@
         "tags": [
           "me"
         ]
+      },
+      "delete": {
+        "description": "Exige a senha. Apaga endereços, favoritos e vínculos; anonimiza avaliações e solicitações; tira do ar os fornecedores da pessoa; encerra todas as sessões. Não tem volta.",
+        "operationId": "MeController_deleteAccount_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Sem login ou sessão encerrada"
+          },
+          "403": {
+            "description": "Único administrador da plataforma"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Exclui a conta e os dados pessoais (LGPD)",
+        "tags": [
+          "me"
+        ]
       }
     },
     "/v1/me/password": {
@@ -729,6 +764,18 @@
         "required": [
           "currentPassword",
           "newPassword"
+        ]
+      },
+      "DeleteAccountDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Senha atual, para confirmar que é o dono da conta"
+          }
+        },
+        "required": [
+          "password"
         ]
       },
       "CategorySummaryDto": {
