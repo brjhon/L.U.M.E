@@ -143,3 +143,75 @@ export interface AuthResponse {
   refreshTokenExpiresAt: string;
   user: Me;
 }
+
+// ---------- Área do parceiro e moderação (Sprint 2) ----------
+
+export const COVERAGE_TYPES = ['RADIUS', 'POLYGON', 'COMMUNITY'] as const;
+export type CoverageType = (typeof COVERAGE_TYPES)[number];
+
+/** Geometria GeoJSON (coordenadas [lng, lat]) aceita como área de cobertura. */
+export interface GeoJsonArea {
+  type: 'Polygon' | 'MultiPolygon';
+  coordinates: number[][][] | number[][][][];
+}
+
+export interface CoverageArea {
+  id: string;
+  type: CoverageType;
+  radiusM: number | null;
+  center: GeoPoint | null;
+  polygon: GeoJsonArea | null;
+  communityId: string | null;
+  /** Verificada pela equipe: é o que dá "CONFIRMED" na busca. */
+  verified: boolean;
+}
+
+export interface PartnerListing {
+  id: string;
+  providerId: string;
+  title: string;
+  description: string | null;
+  mode: ServiceMode;
+  status: ModerationStatus;
+  /** Motivo da última decisão de moderação (rejeição/suspensão). */
+  moderationNote: string | null;
+  category: CategorySummary;
+  coverage: CoverageArea[];
+  updatedAt: string;
+}
+
+export interface PartnerProvider {
+  id: string;
+  kind: ProviderKind;
+  displayName: string;
+  description: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  status: ModerationStatus;
+  moderationNote: string | null;
+  locations: { id: string; address: string; location: GeoPoint }[];
+  listings: PartnerListing[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const MODERATION_DECISIONS = ['APPROVED', 'REJECTED', 'SUSPENDED'] as const;
+export type ModerationDecision = (typeof MODERATION_DECISIONS)[number];
+
+/** Item da fila de moderação do admin. */
+export interface ModerationQueueItem {
+  kind: 'PROVIDER' | 'LISTING';
+  id: string;
+  title: string;
+  status: ModerationStatus;
+  provider: { id: string; displayName: string; status: ModerationStatus };
+  owner: { id: string; name: string; email: string | null } | null;
+  updatedAt: string;
+}
+
+export interface Page<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}

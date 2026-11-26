@@ -592,6 +592,861 @@
           "geocoding"
         ]
       }
+    },
+    "/v1/partner/providers": {
+      "get": {
+        "operationId": "PartnerController_list_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerProviderDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Meus fornecedores, com endereços, ofertas e cobertura",
+        "tags": [
+          "partner"
+        ]
+      },
+      "post": {
+        "operationId": "PartnerController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProviderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerProviderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": ""
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cadastra fornecedor (fica PENDING até a moderação aprovar)",
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/partner/providers/{id}": {
+      "get": {
+        "operationId": "PartnerController_get_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerProviderDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "partner"
+        ]
+      },
+      "patch": {
+        "operationId": "PartnerController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProviderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerProviderDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edita fornecedor (se já aprovado, volta para a moderação)",
+        "tags": [
+          "partner"
+        ]
+      },
+      "delete": {
+        "operationId": "PartnerController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove fornecedor e todas as ofertas dele",
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/partner/providers/{id}/locations": {
+      "post": {
+        "operationId": "PartnerController_addLocation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerProviderDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adiciona endereço físico (usado para distância e \"ir até o local\")",
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/partner/locations/{id}": {
+      "delete": {
+        "operationId": "PartnerController_removeLocation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/partner/providers/{id}/listings": {
+      "post": {
+        "operationId": "PartnerController_createListing_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerListingDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cria oferta (fica PENDING até a moderação aprovar)",
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/partner/listings/{id}": {
+      "get": {
+        "operationId": "PartnerController_getListing_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerListingDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "partner"
+        ]
+      },
+      "patch": {
+        "operationId": "PartnerController_updateListing_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerListingDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edita oferta (se já aprovada, volta para a moderação)",
+        "tags": [
+          "partner"
+        ]
+      },
+      "delete": {
+        "operationId": "PartnerController_removeListing_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/partner/listings/{id}/coverage": {
+      "post": {
+        "description": "Nasce não verificada: na busca aparece como \"UNCONFIRMED\" até a equipe verificar.",
+        "operationId": "PartnerController_addCoverage_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCoverageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerListingDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Geometria inválida, grande demais ou comunidade inexistente"
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Declara onde a oferta atende (raio, polígono ou condomínio)",
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/partner/coverage/{id}": {
+      "delete": {
+        "operationId": "PartnerController_removeCoverage_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Sem login"
+          },
+          "403": {
+            "description": "Cadastro suspenso pela moderação"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "partner"
+        ]
+      }
+    },
+    "/v1/admin/moderation": {
+      "get": {
+        "operationId": "AdminController_queue_v1",
+        "parameters": [
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "description": "Sem valor: os dois",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PROVIDER",
+                "LISTING"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "PENDING",
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED",
+                "SUSPENDED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerationQueueDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          },
+          "403": {
+            "description": "Só administradores da plataforma"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fila de moderação (padrão: pendentes, mais antigos primeiro)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/providers/{id}": {
+      "get": {
+        "operationId": "AdminController_provider_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerProviderDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          },
+          "403": {
+            "description": "Só administradores da plataforma"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fornecedor completo para análise (endereços, ofertas, cobertura)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/providers/{id}/decision": {
+      "post": {
+        "operationId": "AdminController_decideProvider_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationDecisionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "403": {
+            "description": "Só administradores da plataforma"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aprova, rejeita ou suspende um fornecedor",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/listings/{id}/decision": {
+      "post": {
+        "operationId": "AdminController_decideListing_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationDecisionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "403": {
+            "description": "Só administradores da plataforma"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aprova, rejeita ou suspende uma oferta",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/coverage/{id}/verify": {
+      "post": {
+        "operationId": "AdminController_verifyCoverage_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCoverageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": ""
+          },
+          "403": {
+            "description": "Só administradores da plataforma"
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marca (ou desmarca) uma área de cobertura como verificada",
+        "tags": [
+          "admin"
+        ]
+      }
     }
   },
   "info": {
@@ -1110,6 +1965,576 @@
           "formattedAddress",
           "location",
           "postalCode"
+        ]
+      },
+      "PartnerLocationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "address": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/GeoPointDto"
+          }
+        },
+        "required": [
+          "id",
+          "address",
+          "location"
+        ]
+      },
+      "CoverageAreaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "RADIUS",
+              "POLYGON",
+              "COMMUNITY"
+            ]
+          },
+          "radiusM": {
+            "type": "number",
+            "nullable": true
+          },
+          "center": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoPointDto"
+              }
+            ]
+          },
+          "polygon": {
+            "type": "object",
+            "nullable": true,
+            "description": "GeoJSON MultiPolygon"
+          },
+          "communityId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "radiusM",
+          "center",
+          "polygon",
+          "communityId",
+          "verified"
+        ]
+      },
+      "PartnerListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "DELIVERY",
+              "IN_STORE",
+              "AT_HOME",
+              "REMOTE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED"
+            ]
+          },
+          "moderationNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategorySummaryDto"
+          },
+          "coverage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoverageAreaDto"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "providerId",
+          "title",
+          "description",
+          "mode",
+          "status",
+          "moderationNote",
+          "category",
+          "coverage",
+          "updatedAt"
+        ]
+      },
+      "PartnerProviderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BUSINESS",
+              "PROFESSIONAL"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "whatsapp": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED"
+            ]
+          },
+          "moderationNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerLocationDto"
+            }
+          },
+          "listings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerListingDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "displayName",
+          "description",
+          "phone",
+          "whatsapp",
+          "status",
+          "moderationNote",
+          "locations",
+          "listings",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateProviderDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BUSINESS",
+              "PROFESSIONAL"
+            ]
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Elétrica Silva"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "phone": {
+            "type": "string",
+            "example": "5511999990000"
+          },
+          "whatsapp": {
+            "type": "string",
+            "example": "5511999990000"
+          }
+        },
+        "required": [
+          "kind",
+          "displayName"
+        ]
+      },
+      "UpdateProviderDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BUSINESS",
+              "PROFESSIONAL"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "whatsapp": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateLocationDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "Rua Domingos de Morais, 2000 - Vila Mariana, São Paulo"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "address",
+          "lat",
+          "lng"
+        ]
+      },
+      "CreateListingDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "example": "Instalação de chuveiro e tomadas"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "DELIVERY",
+              "IN_STORE",
+              "AT_HOME",
+              "REMOTE"
+            ]
+          }
+        },
+        "required": [
+          "categoryId",
+          "title",
+          "mode"
+        ]
+      },
+      "UpdateListingDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "DELIVERY",
+              "IN_STORE",
+              "AT_HOME",
+              "REMOTE"
+            ]
+          }
+        }
+      },
+      "CreateCoverageDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "RADIUS",
+              "POLYGON",
+              "COMMUNITY"
+            ]
+          },
+          "centerLat": {
+            "type": "number",
+            "description": "RADIUS"
+          },
+          "centerLng": {
+            "type": "number",
+            "description": "RADIUS"
+          },
+          "radiusM": {
+            "type": "number",
+            "description": "RADIUS, em metros (até 50000)"
+          },
+          "polygon": {
+            "type": "object",
+            "description": "POLYGON: geometria GeoJSON Polygon ou MultiPolygon, coordenadas [lng, lat]",
+            "example": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -46.64,
+                    -23.59
+                  ],
+                  [
+                    -46.63,
+                    -23.59
+                  ],
+                  [
+                    -46.63,
+                    -23.58
+                  ],
+                  [
+                    -46.64,
+                    -23.59
+                  ]
+                ]
+              ]
+            }
+          },
+          "communityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "COMMUNITY"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "QueueProviderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "status"
+        ]
+      },
+      "QueueOwnerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email"
+        ]
+      },
+      "ModerationQueueItemDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PROVIDER",
+              "LISTING"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED"
+            ]
+          },
+          "provider": {
+            "$ref": "#/components/schemas/QueueProviderDto"
+          },
+          "owner": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QueueOwnerDto"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "title",
+          "status",
+          "provider",
+          "owner",
+          "updatedAt"
+        ]
+      },
+      "ModerationQueueDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModerationQueueItemDto"
+            }
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "hasMore"
+        ]
+      },
+      "ModerationDecisionDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "description": "Obrigatório ao rejeitar ou suspender; o parceiro vê este texto"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "VerifyCoverageDto": {
+        "type": "object",
+        "properties": {
+          "verified": {
+            "type": "boolean",
+            "description": "true marca como verificada (CONFIRMED na busca); false desfaz"
+          }
+        },
+        "required": [
+          "verified"
         ]
       }
     }

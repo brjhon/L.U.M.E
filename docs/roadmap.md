@@ -24,9 +24,15 @@ e imagem Docker da API.
 - RBAC: guard por papel global + escopo de comunidade.
 - **Critério:** usuário escolhe endereço e tem vínculo aprovado sem ver dados de outra comunidade.
 
-## Sprint 2: catálogo e cobertura
-- CRUD de fornecedores, ofertas e áreas de cobertura (raio, polígono, comunidade) no painel do parceiro.
-- Fila de moderação no painel admin; perfis começam como PENDING.
+## Sprint 2: catálogo e cobertura (API ✅, painel pendente)
+- ✅ API do parceiro (`/v1/partner/*`): fornecedores, endereços, ofertas e cobertura (raio, polígono
+  GeoJSON validado no PostGIS, comunidade). Cada um só vê o que é seu (o resto dá 404).
+- ✅ Tudo nasce PENDING; editar conteúdo aprovado ou rejeitado volta para a fila; suspenso não edita.
+- ✅ Cobertura declarada nasce não verificada (UNCONFIRMED); só a equipe verifica (CONFIRMED).
+- ✅ API de moderação (`/v1/admin/*`, só PLATFORM_ADMIN): fila, análise completa, aprovar/rejeitar/
+  suspender com motivo visível ao parceiro, verificar cobertura. Tudo em `audit_logs`.
+- ✅ Limites: 5 fornecedores por conta, 50 ofertas, 20 áreas, raio até 50 km, polígono até 2.000 km².
+- Telas do painel web (parceiro e moderação).
 - **Critério:** parceiro cadastra oferta e define onde atende, com moderação.
 
 ## Sprint 3: busca e interface ✅ (adiantado, antes dos Sprints 1 e 2)
